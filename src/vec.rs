@@ -16,27 +16,27 @@ impl Vec3 {
         Vec3 { e: [e0, e1, e2] }
     }
 
-    pub fn x(&self) -> f64 {
+    pub fn x(self) -> f64 {
         self[0]
     }
 
-    pub fn y(&self) -> f64 {
+    pub fn y(self) -> f64 {
         self[1]
     }
 
-    pub fn z(&self) -> f64 {
+    pub fn z(self) -> f64 {
         self[2]
     }
 
-    pub fn dot(&self, rhs: &Self) -> f64 {
+    pub fn dot(self, rhs: Self) -> f64 {
         self[0] * rhs[0] + self[1] * rhs[1] + self[2] * rhs[2]
     }
 
-    pub fn length(&self) -> f64 {
+    pub fn length(self) -> f64 {
         self.dot(self).sqrt()
     }
 
-    pub fn cross(&self, rhs: &Self) -> Self {
+    pub fn cross(self, rhs: Self) -> Self {
         Self::new(
             self[1] * rhs[2] - self[2] - rhs[1],
             self[2] * rhs[0] - self[0] * rhs[2],
@@ -44,11 +44,11 @@ impl Vec3 {
         )
     }
 
-    pub fn normalized(&self) -> Self {
+    pub fn normalized(self) -> Self {
         self.div(self.length())
     }
 
-    pub fn format_color(&self) -> String {
+    pub fn format_color(self) -> String {
         format!(
             "{} {} {}",
             (255.99 * self[0]) as u64,
