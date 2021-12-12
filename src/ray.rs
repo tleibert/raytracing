@@ -1,3 +1,9 @@
+//! Provides an abstraction for a ray, which
+//! has both a point of origin as well as a direction.
+//!
+//! Using these, the ray's position at any time `t`
+//! can be calculated.
+
 use super::vec::{Point3, Vec3};
 
 pub struct Ray {

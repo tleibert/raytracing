@@ -1,3 +1,7 @@
+//! Provides a 3-dimensional vector struct
+//! for use representing positions and vectors.
+//! It serves triple duty, also representing colors.
+
 use std::{
     fmt::{self, Display},
     ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign},
