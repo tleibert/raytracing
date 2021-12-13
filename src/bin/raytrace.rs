@@ -1,7 +1,10 @@
+extern crate image;
 extern crate rand;
 extern crate raytracing;
 
+use image::{ImageBuffer, ImageFormat, RgbImage};
 use rand::Rng;
+
 use raytracing::camera::Camera;
 use raytracing::hit::{Hit, World};
 use raytracing::ray::Ray;
@@ -21,7 +24,7 @@ fn ray_color(r: &Ray, world: &World) -> Color {
 fn main() {
     // image
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: u64 = 400;
+    const IMAGE_WIDTH: u64 = 1920;
     const IMAGE_HEIGHT: u64 = ((IMAGE_WIDTH as f64) / ASPECT_RATIO) as u64;
     const SAMPLES_PER_PIXEL: u64 = 100;
 
@@ -34,11 +37,13 @@ fn main() {
 
     // camera
     let cam = Camera::new();
-    println!("P3");
-    println!("{} {}", IMAGE_WIDTH, IMAGE_HEIGHT);
-    println!("255");
+    // println!("P3");
+    // println!("{} {}", IMAGE_WIDTH, IMAGE_HEIGHT);
+    // println!("255");
 
     let mut rng = rand::thread_rng();
+    let mut image_buffer: RgbImage = ImageBuffer::new(IMAGE_WIDTH as u32, IMAGE_HEIGHT as u32);
+
     for j in (0..IMAGE_HEIGHT).rev() {
         eprintln!("Scanlines remaining: {}", j);
         for i in 0..IMAGE_WIDTH {
@@ -54,9 +59,16 @@ fn main() {
                 pixel_color += ray_color(&r, &world);
             }
 
-            println!("{}", pixel_color.format_color(SAMPLES_PER_PIXEL));
+            let pixel = pixel_color.to_rgb(SAMPLES_PER_PIXEL);
+            image_buffer.put_pixel(i as u32, (IMAGE_HEIGHT - j - 1) as u32, pixel);
+
+            // println!("{}", pixel_color.format_color(SAMPLES_PER_PIXEL));
         }
     }
+
+    image_buffer
+        .save_with_format("image.png", ImageFormat::Png)
+        .unwrap();
 
     eprintln!("Done.");
 }

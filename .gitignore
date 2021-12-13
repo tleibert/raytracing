@@ -1,4 +1,5 @@
 /target
 *.ppm
+*.png
 .vscode/
 .DS_Store/

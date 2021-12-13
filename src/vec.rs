@@ -7,6 +7,8 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign},
 };
 
+use image::Rgb;
+
 #[derive(Clone, Copy)]
 pub struct Vec3 {
     e: [f64; 3],
@@ -57,6 +59,15 @@ impl Vec3 {
         let ig = (256.0 * (self[1] / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u64;
         let ib = (256.0 * (self[2] / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u64;
         format!("{} {} {}", ir, ig, ib)
+    }
+
+    pub fn to_rgb(self, samples_per_pixel: u64) -> Rgb<u8> {
+        let ir = (256.0 * (self[0] / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u8;
+        let ig = (256.0 * (self[1] / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u8;
+        let ib = (256.0 * (self[2] / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u8;
+
+        let arr = [ir, ig, ib];
+        Rgb::from(arr)
     }
 }
 
