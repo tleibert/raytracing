@@ -4,6 +4,7 @@ extern crate raytracing;
 
 use image::{ImageBuffer, ImageFormat, RgbImage};
 use rand::Rng;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 use raytracing::camera::Camera;
 use raytracing::hit::{Hit, World};
@@ -63,28 +64,35 @@ fn main() {
     // println!("{} {}", IMAGE_WIDTH, IMAGE_HEIGHT);
     // println!("255");
 
-    let mut rng = rand::thread_rng();
     let mut image_buffer: RgbImage = ImageBuffer::new(IMAGE_WIDTH as u32, IMAGE_HEIGHT as u32);
 
     for j in (0..IMAGE_HEIGHT).rev() {
         eprintln!("Scanlines remaining: {}", j);
-        for i in 0..IMAGE_WIDTH {
-            let mut pixel_color = Color::new(0.0, 0.0, 0.0);
-            for _ in 0..SAMPLES_PER_PIXEL {
-                let random_u: f64 = rng.gen();
-                let random_v: f64 = rng.gen();
+        let scanline: Vec<Color> = (0..IMAGE_WIDTH)
+            .into_par_iter()
+            .map(|i| {
+                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
+                let mut rng = rand::thread_rng();
+                for _ in 0..SAMPLES_PER_PIXEL {
+                    let random_u: f64 = rng.gen();
+                    let random_v: f64 = rng.gen();
 
-                let u = ((i as f64) + random_u) / ((IMAGE_WIDTH - 1) as f64);
-                let v = ((j as f64) + random_v) / ((IMAGE_HEIGHT - 1) as f64);
+                    let u = ((i as f64) + random_u) / ((IMAGE_WIDTH - 1) as f64);
+                    let v = ((j as f64) + random_v) / ((IMAGE_HEIGHT - 1) as f64);
 
-                let r = cam.get_ray(u, v);
-                pixel_color += ray_color(&r, &world, MAX_DEPTH);
-            }
+                    let r = cam.get_ray(u, v);
+                    pixel_color += ray_color(&r, &world, MAX_DEPTH);
+                }
 
-            let pixel = pixel_color.to_rgb(SAMPLES_PER_PIXEL);
+                pixel_color
+
+                // println!("{}", pixel_color.format_color(SAMPLES_PER_PIXEL));
+            })
+            .collect();
+
+        for (i, pixel) in scanline.into_iter().enumerate() {
+            let pixel = pixel.to_rgb(SAMPLES_PER_PIXEL);
             image_buffer.put_pixel(i as u32, (IMAGE_HEIGHT - j - 1) as u32, pixel);
-
-            // println!("{}", pixel_color.format_color(SAMPLES_PER_PIXEL));
         }
     }
 
