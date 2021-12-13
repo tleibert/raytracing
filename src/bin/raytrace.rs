@@ -7,7 +7,7 @@ use rand::Rng;
 
 use raytracing::camera::Camera;
 use raytracing::hit::{Hit, World};
-use raytracing::material::Lambertian;
+use raytracing::material::{Lambertian, Metal};
 use raytracing::ray::Ray;
 use raytracing::sphere::Sphere;
 use raytracing::vec::{Color, Point3, Vec3};
@@ -42,11 +42,20 @@ fn main() {
 
     // world
     let mut world = World::new();
-    let red_matte = Lambertian::new(Color::new(0.3, 0.0, 0.0));
-    let sphere = Sphere::new(Point3::new(0.0, 0.0, -1.0), -0.5, &red_matte);
-    let ground = Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, &red_matte);
-    world.push(&sphere);
-    world.push(&ground);
+    let mat_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
+    let mat_center = Lambertian::new(Color::new(0.7, 0.3, 0.3));
+    let mat_left = Metal::new(Color::new(0.8, 0.8, 0.8), 0.3);
+    let mat_right = Metal::new(Color::new(0.8, 0.6, 0.2), 1.0);
+
+    let sphere_ground = Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, &mat_ground);
+    let sphere_center = Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, &mat_center);
+    let sphere_left = Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, &mat_left);
+    let sphere_right = Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, &mat_right);
+
+    world.push(&sphere_ground);
+    world.push(&sphere_center);
+    world.push(&sphere_left);
+    world.push(&sphere_right);
 
     // camera
     let cam = Camera::new();
