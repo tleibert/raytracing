@@ -4,6 +4,7 @@
 
 use std::{
     fmt::{self, Display},
+    iter::Sum,
     ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Range, Sub, SubAssign},
 };
 
@@ -218,5 +219,11 @@ impl DivAssign<f64> for Vec3 {
 impl Display for Vec3 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "({} , {}, {})", self[0], self[1], self[2])
+    }
+}
+
+impl Sum for Vec3 {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Self::new(0.0, 0.0, 0.0), |acc, v| acc + v)
     }
 }
