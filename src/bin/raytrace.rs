@@ -15,7 +15,7 @@ use raytracing::vec::{Color, Point3, Vec3};
 
 fn ray_color(r: &Ray, world: &World, depth: u64) -> Color {
     if depth == 0 {
-        // if we've exceded the allowed number of ray bounces, stop gathering more info
+        // if we've exceeded the allowed number of ray bounces, stop gathering more info
         return Color::new(0.0, 0.0, 0.0);
     }
     if let Some(rec) = world.hit(r, 0.001, f64::INFINITY) {
