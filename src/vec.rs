@@ -63,6 +63,17 @@ impl Vec3 {
         self - 2.0 * self.dot(n) * n
     }
 
+    pub fn length_squared(self) -> f64 {
+        self[0].powi(2) + self[1].powi(2) + self[2].powi(2)
+    }
+
+    pub fn refract(self, n: Self, etai_over_etat: f64) -> Self {
+        let cos_theta = self.dot(n).min(1.0);
+        let r_out_perp = etai_over_etat * (self + cos_theta * n);
+        let r_out_parallel = -(1.0 - r_out_perp.length_squared()).abs().sqrt() * n;
+        r_out_perp + r_out_parallel
+    }
+
     pub fn x(self) -> f64 {
         self[0]
     }
