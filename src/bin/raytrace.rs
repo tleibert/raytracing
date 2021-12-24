@@ -8,7 +8,7 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 use raytracing::camera::Camera;
 use raytracing::hit::{Hit, World};
-use raytracing::material::{Lambertian, Metal};
+use raytracing::material::{Dielectric, Lambertian, Metal};
 use raytracing::ray::Ray;
 use raytracing::sphere::Sphere;
 use raytracing::vec::{Color, Point3, Vec3};
@@ -44,8 +44,8 @@ fn main() {
     // world
     let mut world = World::new();
     let mat_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
-    let mat_center = Lambertian::new(Color::new(0.7, 0.3, 0.3));
-    let mat_left = Metal::new(Color::new(0.8, 0.8, 0.8), 0.3);
+    let mat_center = Dielectric::new(1.5);
+    let mat_left = Dielectric::new(1.5);
     let mat_right = Metal::new(Color::new(0.8, 0.6, 0.2), 1.0);
 
     let sphere_ground = Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, &mat_ground);
