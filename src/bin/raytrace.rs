@@ -70,13 +70,21 @@ fn main() {
     world.push(sphere_left_inner);
     world.push(sphere_right);
 
+    let origin = Point3::new(3.0, 3.0, 2.0);
+    let look_at = Point3::new(0.0, 0.0, -1.0);
+    let roll = 0.0;
+    let dist_to_focus = (origin - look_at).length();
+    let aperture = 2.0;
+
     // camera
     let cam = Camera::new(
-        Point3::new(-2.0, 2.0, 1.0), //Point3::new(-2.0, 2.0, 1.0),
-        Point3::new(0.0, 0.0, -1.0),
+        origin,
+        look_at,
+        roll,
         20.0,
         ASPECT_RATIO,
-        0.0,
+        aperture,
+        dist_to_focus,
     );
 
     let mut image_buffer: RgbImage = ImageBuffer::new(IMAGE_WIDTH as u32, IMAGE_HEIGHT as u32);

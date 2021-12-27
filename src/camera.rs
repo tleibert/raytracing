@@ -13,7 +13,15 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(origin: Point3, look_at: Point3, fov: f64, aspect_ratio: f64, roll: f64) -> Self {
+    pub fn new(
+        origin: Point3,
+        look_at: Point3,
+        roll: f64,
+        fov: f64,
+        aspect_ratio: f64,
+        aperture: f64,
+        focus_dist: f64,
+    ) -> Self {
         // convert to radians
         let roll_angle = roll.to_radians();
         let rotated_up = Vec3::new(-roll_angle.sin(), roll_angle.cos(), 0.0);
@@ -26,22 +34,30 @@ impl Camera {
         let v = w.cross(u);
 
         let origin = origin;
-        let horizontal = u * viewport_width;
-        let vertical = v * viewport_height;
-        let lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0 - w;
+        let horizontal = u * viewport_width * focus_dist;
+        let vertical = v * viewport_height * focus_dist;
+        let lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0 - focus_dist * w;
 
         Self {
             origin,
             horizontal,
             vertical,
             lower_left_corner,
+            u,
+            v,
+            lens_radius: aperture / 2.0,
         }
     }
 
     pub fn get_ray(&self, s: f64, t: f64) -> Ray {
+        let rd = self.lens_radius * Vec3::random_in_unit_disk();
+        let offset = self.u * rd.x() + self.v * rd.y();
+
         Ray::new(
-            self.origin,
-            self.lower_left_corner + (s * self.horizontal) + (t * self.vertical) - self.origin,
+            self.origin + offset,
+            self.lower_left_corner + (s * self.horizontal) + (t * self.vertical)
+                - self.origin
+                - offset,
         )
     }
 }
