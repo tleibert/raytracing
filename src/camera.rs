@@ -4,6 +4,7 @@ use crate::ray::Ray;
 
 use super::vec::{Point3, Vec3};
 
+#[derive(Debug)]
 pub struct Camera {
     origin: Point3,
     lower_left_corner: Point3,
@@ -12,20 +13,22 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(vfov: f64, aspect_ratio: f64) -> Self {
+    pub fn new(origin: Point3, look_at: Point3, fov: f64, aspect_ratio: f64, roll: f64) -> Self {
         // convert to radians
-        let theta = vfov * std::f64::consts::PI / 180.0;
-        let h = (theta / 2.0).tan();
+        let roll_angle = roll.to_radians();
+        let rotated_up = Vec3::new(-roll_angle.sin(), roll_angle.cos(), 0.0);
+        let h = (fov.to_radians() / 2.0).tan();
         let viewport_height = 2.0 * h;
         let viewport_width = aspect_ratio * viewport_height;
 
-        const FOCAL_LENGTH: f64 = 1.0;
+        let w = (origin - look_at).normalized();
+        let u = rotated_up.cross(w).normalized();
+        let v = w.cross(u);
 
-        let origin = Point3::new(0.0, 0.0, 0.0);
-        let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
-        let vertical = Vec3::new(0.0, viewport_height, 0.0);
-        let lower_left_corner =
-            origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, FOCAL_LENGTH);
+        let origin = origin;
+        let horizontal = u * viewport_width;
+        let vertical = v * viewport_height;
+        let lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0 - w;
 
         Self {
             origin,
@@ -35,10 +38,10 @@ impl Camera {
         }
     }
 
-    pub fn get_ray(&self, u: f64, v: f64) -> Ray {
+    pub fn get_ray(&self, s: f64, t: f64) -> Ray {
         Ray::new(
             self.origin,
-            self.lower_left_corner + u * self.horizontal + v * self.vertical - self.origin,
+            self.lower_left_corner + (s * self.horizontal) + (t * self.vertical) - self.origin,
         )
     }
 }

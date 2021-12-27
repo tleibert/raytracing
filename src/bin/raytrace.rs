@@ -13,7 +13,7 @@ use raytracing::hit::{Hit, World};
 use raytracing::material::{Dielectric, Lambertian, Metal};
 use raytracing::ray::Ray;
 use raytracing::sphere::Sphere;
-use raytracing::vec::{Color, Point3, Vec3};
+use raytracing::vec::{Color, Point3};
 
 fn ray_color(r: &Ray, world: &World, depth: u64) -> Color {
     if depth == 0 {
@@ -71,10 +71,13 @@ fn main() {
     world.push(sphere_right);
 
     // camera
-    let cam = Camera::new(90.0, ASPECT_RATIO);
-    // println!("P3");
-    // println!("{} {}", IMAGE_WIDTH, IMAGE_HEIGHT);
-    // println!("255");
+    let cam = Camera::new(
+        Point3::new(-2.0, 2.0, 1.0), //Point3::new(-2.0, 2.0, 1.0),
+        Point3::new(0.0, 0.0, -1.0),
+        20.0,
+        ASPECT_RATIO,
+        0.0,
+    );
 
     let mut image_buffer: RgbImage = ImageBuffer::new(IMAGE_WIDTH as u32, IMAGE_HEIGHT as u32);
 
@@ -97,8 +100,6 @@ fn main() {
                         ray_color(&r, &world, MAX_DEPTH)
                     })
                     .sum()
-
-                // println!("{}", pixel_color.format_color(SAMPLES_PER_PIXEL));
             })
             .collect();
 
