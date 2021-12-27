@@ -13,7 +13,7 @@ use std::{
 use image::Rgb;
 use rand::Rng;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Vec3 {
     e: [f64; 3],
 }
@@ -98,7 +98,7 @@ impl Vec3 {
 
     pub fn cross(self, rhs: Self) -> Self {
         Self::new(
-            self[1] * rhs[2] - self[2] - rhs[1],
+            self[1] * rhs[2] - self[2] * rhs[1],
             self[2] * rhs[0] - self[0] * rhs[2],
             self[0] * rhs[1] - self[1] * rhs[0],
         )
