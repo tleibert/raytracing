@@ -1,5 +1,7 @@
 //! Provides a material trait
 
+use rand::Rng;
+
 use super::hit::HitRecord;
 use super::ray::Ray;
 use super::vec::Color;
@@ -71,6 +73,12 @@ impl Dielectric {
             index_of_refraction,
         }
     }
+
+    fn reflectance(cosine: f64, ref_idx: f64) -> f64 {
+        // use schlick's approximation for reflectance
+        let r0 = ((1.0 - ref_idx) / (1.0 + ref_idx)).powi(2);
+        r0 * (1.0 - r0) * (1.0 - cosine).powi(5)
+    }
 }
 
 impl Scatter for Dielectric {
@@ -82,9 +90,20 @@ impl Scatter for Dielectric {
         };
 
         let unit_direction = r_in.direction().normalized();
-        let refracted = unit_direction.refract(rec.normal, refraction_ratio);
-        let scattered = Ray::new(rec.p, refracted);
+        let cos_theta = (-unit_direction).dot(rec.normal).min(1.0);
+        let sin_theta = (1.0 - cos_theta.powi(2)).sqrt();
 
+        let cannot_refract = refraction_ratio * sin_theta > 1.0;
+        let must_reflect =
+            Self::reflectance(cos_theta, refraction_ratio) > rand::thread_rng().gen();
+
+        let direction = if cannot_refract || must_reflect {
+            unit_direction.reflect(rec.normal)
+        } else {
+            unit_direction.refract(rec.normal, refraction_ratio)
+        };
+
+        let scattered = Ray::new(rec.p, direction);
         Some((Color::new(1.0, 1.0, 1.0), scattered))
     }
 }

@@ -5,7 +5,9 @@
 use std::{
     fmt::{self, Display},
     iter::Sum,
-    ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Range, Sub, SubAssign},
+    ops::{
+        Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Range, Sub, SubAssign,
+    },
 };
 
 use image::Rgb;
@@ -50,7 +52,7 @@ impl Vec3 {
         if in_unit_sphere.dot(normal) > 0.0 {
             in_unit_sphere
         } else {
-            -1.0 * in_unit_sphere
+            -in_unit_sphere
         }
     }
 
@@ -68,7 +70,7 @@ impl Vec3 {
     }
 
     pub fn refract(self, n: Self, etai_over_etat: f64) -> Self {
-        let cos_theta = (-1.0 * self).dot(n).min(1.0);
+        let cos_theta = (-self).dot(n).min(1.0);
         let r_out_perp = etai_over_etat * (self + cos_theta * n);
         let r_out_parallel = -(1.0 - r_out_perp.length_squared()).abs().sqrt() * n;
         r_out_perp + r_out_parallel
@@ -236,5 +238,13 @@ impl Display for Vec3 {
 impl Sum for Vec3 {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
         iter.fold(Self::new(0.0, 0.0, 0.0), |acc, v| acc + v)
+    }
+}
+
+impl Neg for Vec3 {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self::new(-self[0], -self[1], -self[2])
     }
 }

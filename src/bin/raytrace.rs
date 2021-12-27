@@ -41,14 +41,14 @@ fn main() {
     const IMAGE_WIDTH: u64 = 1920;
     const IMAGE_HEIGHT: u64 = ((IMAGE_WIDTH as f64) / ASPECT_RATIO) as u64;
     const SAMPLES_PER_PIXEL: u64 = 100;
-    const MAX_DEPTH: u64 = 5;
+    const MAX_DEPTH: u64 = 50;
 
     // world
     let mut world = World::new();
     let mat_ground = Arc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
-    let mat_center = Arc::new(Dielectric::new(1.5));
+    let mat_center = Arc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
     let mat_left = Arc::new(Dielectric::new(1.5));
-    let mat_right = Arc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 1.0));
+    let mat_right = Arc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.0));
 
     let sphere_ground = Arc::new(Sphere::new(
         Point3::new(0.0, -100.5, -1.0),
@@ -56,12 +56,18 @@ fn main() {
         mat_ground,
     ));
     let sphere_center = Arc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, mat_center));
-    let sphere_left = Arc::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, mat_left));
+    let sphere_left = Arc::new(Sphere::new(
+        Point3::new(-1.0, 0.0, -1.0),
+        0.5,
+        mat_left.clone(),
+    ));
+    let sphere_left_inner = Arc::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), -0.4, mat_left));
     let sphere_right = Arc::new(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, mat_right));
 
     world.push(sphere_ground);
     world.push(sphere_center);
     world.push(sphere_left);
+    world.push(sphere_left_inner);
     world.push(sphere_right);
 
     // camera
