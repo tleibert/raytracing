@@ -1,18 +1,20 @@
 //! Represents a sphere with a dynamic material.
 
+use std::sync::Arc;
+
 use super::hit::{Hit, HitRecord};
 use super::material::Scatter;
 use super::ray::Ray;
 use super::vec::{Point3, Vec3};
 
-pub struct Sphere<'a> {
+pub struct Sphere {
     center: Point3,
     radius: f64,
-    mat: &'a dyn Scatter,
+    mat: Arc<dyn Scatter>,
 }
 
-impl<'a> Sphere<'a> {
-    pub fn new(center: Point3, radius: f64, mat: &'a dyn Scatter) -> Self {
+impl Sphere {
+    pub fn new(center: Point3, radius: f64, mat: Arc<dyn Scatter>) -> Self {
         Self {
             center,
             radius,
@@ -21,7 +23,7 @@ impl<'a> Sphere<'a> {
     }
 }
 
-impl<'a> Hit for Sphere<'a> {
+impl Hit for Sphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let oc = r.origin() - self.center;
         let a = r.direction().length().powi(2);
@@ -46,7 +48,7 @@ impl<'a> Hit for Sphere<'a> {
         let mut rec = HitRecord {
             t: root,
             p: r.at(root),
-            mat: self.mat,
+            mat: &*self.mat,
             normal: Vec3::new(0.0, 0.0, 0.0),
             front_face: false,
         };

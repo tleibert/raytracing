@@ -2,6 +2,8 @@ extern crate image;
 extern crate rand;
 extern crate raytracing;
 
+use std::sync::Arc;
+
 use image::{ImageBuffer, ImageFormat, RgbImage};
 use rand::Rng;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -43,20 +45,24 @@ fn main() {
 
     // world
     let mut world = World::new();
-    let mat_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
-    let mat_center = Dielectric::new(1.5);
-    let mat_left = Dielectric::new(1.5);
-    let mat_right = Metal::new(Color::new(0.8, 0.6, 0.2), 1.0);
+    let mat_ground = Arc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
+    let mat_center = Arc::new(Dielectric::new(1.5));
+    let mat_left = Arc::new(Dielectric::new(1.5));
+    let mat_right = Arc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 1.0));
 
-    let sphere_ground = Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, &mat_ground);
-    let sphere_center = Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, &mat_center);
-    let sphere_left = Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, &mat_left);
-    let sphere_right = Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, &mat_right);
+    let sphere_ground = Arc::new(Sphere::new(
+        Point3::new(0.0, -100.5, -1.0),
+        100.0,
+        mat_ground,
+    ));
+    let sphere_center = Arc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, mat_center));
+    let sphere_left = Arc::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, mat_left));
+    let sphere_right = Arc::new(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, mat_right));
 
-    world.push(&sphere_ground);
-    world.push(&sphere_center);
-    world.push(&sphere_left);
-    world.push(&sphere_right);
+    world.push(sphere_ground);
+    world.push(sphere_center);
+    world.push(sphere_left);
+    world.push(sphere_right);
 
     // camera
     let cam = Camera::new();
