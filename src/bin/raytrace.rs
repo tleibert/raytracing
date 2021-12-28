@@ -10,7 +10,7 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 use raytracing::camera::Camera;
 use raytracing::hit::{Hit, World};
-use raytracing::material::{Dielectric, Lambertian, Metal};
+use raytracing::material::{Dielectric, Lambertian, Metal, Scatter};
 use raytracing::ray::Ray;
 use raytracing::sphere::Sphere;
 use raytracing::vec::{Color, Point3};
@@ -35,48 +35,84 @@ fn ray_color(r: &Ray, world: &World, depth: u64) -> Color {
     }
 }
 
+fn random_scene() -> World {
+    let mut world = World::new();
+
+    let ground_material = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
+    let ground = Box::new(Sphere::new(
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        ground_material,
+    ));
+
+    world.push(ground);
+
+    let glass_mat = Arc::new(Dielectric::new(1.5));
+
+    let mut rng = rand::thread_rng();
+    for a in -11..11 {
+        for b in -11..11 {
+            let center = Point3::new(
+                (a as f64) + rng.gen_range(0.0..0.9),
+                0.2,
+                (b as f64) + rng.gen_range(0.0..0.9),
+            );
+
+            // make sure spheres aren't inside the big center spheres
+            if (center - Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+                let choose_mat: f64 = rng.gen();
+
+                let mat: Arc<dyn Scatter> = if choose_mat < 0.8 {
+                    // diffuse
+                    let albedo = Color::random(0.0..1.0) * Color::random(0.0..1.0);
+                    Arc::new(Lambertian::new(albedo))
+                } else if choose_mat < 0.95 {
+                    let albedo = Color::random(0.4..1.0);
+                    let fuzz = rng.gen_range(0.0..0.5);
+                    Arc::new(Metal::new(albedo, fuzz))
+                } else {
+                    glass_mat.clone()
+                };
+                let sphere = Sphere::new(center, 0.2, mat);
+
+                world.push(Box::new(sphere));
+            }
+        }
+    }
+
+    // 3 main spheres
+    let diffuse = Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
+    let metal = Arc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
+
+    let big_glass = Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, glass_mat);
+    let big_diffuse = Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, diffuse);
+    let big_metal = Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, metal);
+
+    world.push(Box::new(big_glass));
+    world.push(Box::new(big_diffuse));
+    world.push(Box::new(big_metal));
+
+    world
+}
+
 fn main() {
     // image
-    const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: u64 = 1920;
+    const ASPECT_RATIO: f64 = 3.0 / 2.0;
+    const IMAGE_WIDTH: u64 = 1200;
     const IMAGE_HEIGHT: u64 = ((IMAGE_WIDTH as f64) / ASPECT_RATIO) as u64;
-    const SAMPLES_PER_PIXEL: u64 = 100;
-    const MAX_DEPTH: u64 = 50;
+    const SAMPLES_PER_PIXEL: u64 = 50;
+    const MAX_DEPTH: u64 = 10;
 
     // world
-    let mut world = World::new();
-    let mat_ground = Arc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
-    let mat_center = Arc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
-    let mat_left = Arc::new(Dielectric::new(1.5));
-    let mat_right = Arc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.0));
-
-    let sphere_ground = Arc::new(Sphere::new(
-        Point3::new(0.0, -100.5, -1.0),
-        100.0,
-        mat_ground,
-    ));
-    let sphere_center = Arc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, mat_center));
-    let sphere_left = Arc::new(Sphere::new(
-        Point3::new(-1.0, 0.0, -1.0),
-        0.5,
-        mat_left.clone(),
-    ));
-    let sphere_left_inner = Arc::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), -0.4, mat_left));
-    let sphere_right = Arc::new(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, mat_right));
-
-    world.push(sphere_ground);
-    world.push(sphere_center);
-    world.push(sphere_left);
-    world.push(sphere_left_inner);
-    world.push(sphere_right);
-
-    let origin = Point3::new(3.0, 3.0, 2.0);
-    let look_at = Point3::new(0.0, 0.0, -1.0);
-    let roll = 0.0;
-    let dist_to_focus = (origin - look_at).length();
-    let aperture = 2.0;
+    let world = random_scene();
 
     // camera
+    let origin = Point3::new(13.0, 2.0, 3.0);
+    let look_at = Point3::new(0.0, 0.0, 0.0);
+    let roll = 0.0;
+    let dist_to_focus = 10.0;
+    let aperture = 0.1;
+
     let cam = Camera::new(
         origin,
         look_at,
