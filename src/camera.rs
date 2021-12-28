@@ -2,7 +2,7 @@
 
 use crate::ray::Ray;
 
-use super::vec::{Point3, Vec3};
+use super::vec::{Graphics, Point3, Vec3};
 
 #[derive(Debug)]
 pub struct Camera {
@@ -12,18 +12,18 @@ pub struct Camera {
     vertical: Vec3,
     u: Vec3,
     v: Vec3,
-    lens_radius: f64,
+    lens_radius: f32,
 }
 
 impl Camera {
     pub fn new(
         origin: Point3,
         look_at: Point3,
-        roll: f64,
-        fov: f64,
-        aspect_ratio: f64,
-        aperture: f64,
-        focus_dist: f64,
+        roll: f32,
+        fov: f32,
+        aspect_ratio: f32,
+        aperture: f32,
+        focus_dist: f32,
     ) -> Self {
         // convert to radians
         let roll_angle = roll.to_radians();
@@ -32,8 +32,8 @@ impl Camera {
         let viewport_height = 2.0 * h;
         let viewport_width = aspect_ratio * viewport_height;
 
-        let w = (origin - look_at).normalized();
-        let u = rotated_up.cross(w).normalized();
+        let w = (origin - look_at).normalize();
+        let u = rotated_up.cross(w).normalize();
         let v = w.cross(u);
 
         let origin = origin;
@@ -52,9 +52,9 @@ impl Camera {
         }
     }
 
-    pub fn get_ray(&self, s: f64, t: f64) -> Ray {
+    pub fn get_ray(&self, s: f32, t: f32) -> Ray {
         let rd = self.lens_radius * Vec3::random_in_unit_disk();
-        let offset = self.u * rd.x() + self.v * rd.y();
+        let offset = self.u * rd.x + self.v * rd.y;
 
         Ray::new(
             self.origin + offset,

@@ -13,14 +13,14 @@ use raytracing::hit::{Hit, World};
 use raytracing::material::{Dielectric, Lambertian, Metal, Scatter};
 use raytracing::ray::Ray;
 use raytracing::sphere::Sphere;
-use raytracing::vec::{Color, Point3};
+use raytracing::vec::{Color, Graphics, Point3};
 
 fn ray_color(r: &Ray, world: &World, depth: u64) -> Color {
     if depth == 0 {
         // if we've exceeded the allowed number of ray bounces, stop gathering more info
         return Color::new(0.0, 0.0, 0.0);
     }
-    if let Some(rec) = world.hit(r, 0.001, f64::INFINITY) {
+    if let Some(rec) = world.hit(r, 0.001, f32::INFINITY) {
         // let target = rec.p + rec.normal + Vec3::random_in_unit_sphere();
         // let target = rec.p + rec.normal + Vec3::random_in_unit_sphere().normalized();
         if let Some((attenuation, scattered)) = rec.mat.scatter(r, &rec) {
@@ -29,8 +29,8 @@ fn ray_color(r: &Ray, world: &World, depth: u64) -> Color {
             Color::new(0.0, 0.0, 0.0)
         }
     } else {
-        let unit_direction = r.direction().normalized();
-        let t = 0.5 * (unit_direction.y() + 1.0);
+        let unit_direction = r.direction().normalize();
+        let t = 0.5 * (unit_direction.y + 1.0);
         (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
     }
 }
@@ -53,14 +53,14 @@ fn random_scene() -> World {
     for a in -11..11 {
         for b in -11..11 {
             let center = Point3::new(
-                (a as f64) + rng.gen_range(0.0..0.9),
+                (a as f32) + rng.gen_range(0.0..0.9),
                 0.2,
-                (b as f64) + rng.gen_range(0.0..0.9),
+                (b as f32) + rng.gen_range(0.0..0.9),
             );
 
             // make sure spheres aren't inside the big center spheres
             if (center - Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
-                let choose_mat: f64 = rng.gen();
+                let choose_mat: f32 = rng.gen();
 
                 let mat: Arc<dyn Scatter> = if choose_mat < 0.8 {
                     // diffuse
@@ -101,10 +101,10 @@ fn random_scene() -> World {
 
 fn main() {
     // image
-    const ASPECT_RATIO: f64 = 16.0 / 9.0;
+    const ASPECT_RATIO: f32 = 16.0 / 9.0;
     const IMAGE_WIDTH: u64 = 1920;
-    const IMAGE_HEIGHT: u64 = ((IMAGE_WIDTH as f64) / ASPECT_RATIO) as u64;
-    const SAMPLES_PER_PIXEL: u64 = 50;
+    const IMAGE_HEIGHT: u64 = ((IMAGE_WIDTH as f32) / ASPECT_RATIO) as u64;
+    const SAMPLES_PER_PIXEL: u64 = 5;
     const MAX_DEPTH: u64 = 10;
 
     // world
@@ -135,19 +135,19 @@ fn main() {
             .into_par_iter()
             .map(|i| {
                 let mut rng = rand::thread_rng();
-                (0..SAMPLES_PER_PIXEL)
-                    .into_iter()
-                    .map(|_| {
-                        let random_u: f64 = rng.gen();
-                        let random_v: f64 = rng.gen();
+                let mut total = Color::new(0.0, 0.0, 0.0);
+                for _ in 0..SAMPLES_PER_PIXEL {
+                    let random_u: f32 = rng.gen();
+                    let random_v: f32 = rng.gen();
 
-                        let u = ((i as f64) + random_u) / ((IMAGE_WIDTH - 1) as f64);
-                        let v = ((j as f64) + random_v) / ((IMAGE_HEIGHT - 1) as f64);
+                    let u = ((i as f32) + random_u) / ((IMAGE_WIDTH - 1) as f32);
+                    let v = ((j as f32) + random_v) / ((IMAGE_HEIGHT - 1) as f32);
 
-                        let r = cam.get_ray(u, v);
-                        ray_color(&r, &world, MAX_DEPTH)
-                    })
-                    .sum()
+                    let r = cam.get_ray(u, v);
+                    total += ray_color(&r, &world, MAX_DEPTH)
+                }
+
+                total
             })
             .collect();
 
