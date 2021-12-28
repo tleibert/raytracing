@@ -84,21 +84,25 @@ fn random_scene() -> World {
     let diffuse = Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
     let metal = Arc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
 
-    let big_glass = Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, glass_mat);
-    let big_diffuse = Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, diffuse);
-    let big_metal = Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, metal);
+    let big_glass = Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, glass_mat.clone());
+    let big_diffuse = Sphere::new(Point3::new(-8.0, 1.0, 0.0), 1.0, diffuse);
+    let big_metal = Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, metal);
+    let big_hollow = Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, glass_mat.clone());
+    let big_hollow_inner = Sphere::new(Point3::new(4.0, 1.0, 0.0), -0.8, glass_mat);
 
     world.push(Box::new(big_glass));
     world.push(Box::new(big_diffuse));
     world.push(Box::new(big_metal));
+    world.push(Box::new(big_hollow));
+    world.push(Box::new(big_hollow_inner));
 
     world
 }
 
 fn main() {
     // image
-    const ASPECT_RATIO: f64 = 3.0 / 2.0;
-    const IMAGE_WIDTH: u64 = 1200;
+    const ASPECT_RATIO: f64 = 16.0 / 9.0;
+    const IMAGE_WIDTH: u64 = 1920;
     const IMAGE_HEIGHT: u64 = ((IMAGE_WIDTH as f64) / ASPECT_RATIO) as u64;
     const SAMPLES_PER_PIXEL: u64 = 50;
     const MAX_DEPTH: u64 = 10;
