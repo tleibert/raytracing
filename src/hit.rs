@@ -2,6 +2,8 @@
 //! that can be hit by a ray. Anything that can
 //! be drawn needs to implement this trait.
 
+use crate::sphere::Sphere;
+
 use super::material::Scatter;
 use super::ray::Ray;
 use super::vec::{Point3, Vec3};
@@ -29,7 +31,7 @@ pub trait Hit: Send + Sync {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
 
-pub type World = Vec<Box<dyn Hit>>;
+pub type World = Vec<Sphere>;
 
 impl Hit for World {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {

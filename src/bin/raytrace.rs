@@ -39,11 +39,11 @@ fn random_scene() -> World {
     let mut world = World::new();
 
     let ground_material = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
-    let ground = Box::new(Sphere::new(
+    let ground = Sphere::new(
         Point3::new(0.0, -1000.0, 0.0),
         1000.0,
         ground_material,
-    ));
+    );
 
     world.push(ground);
 
@@ -75,7 +75,7 @@ fn random_scene() -> World {
                 };
                 let sphere = Sphere::new(center, 0.2, mat);
 
-                world.push(Box::new(sphere));
+                world.push(sphere);
             }
         }
     }
@@ -90,11 +90,11 @@ fn random_scene() -> World {
     let big_hollow = Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, glass_mat.clone());
     let big_hollow_inner = Sphere::new(Point3::new(4.0, 1.0, 0.0), -0.8, glass_mat);
 
-    world.push(Box::new(big_glass));
-    world.push(Box::new(big_diffuse));
-    world.push(Box::new(big_metal));
-    world.push(Box::new(big_hollow));
-    world.push(Box::new(big_hollow_inner));
+    world.push(big_glass);
+    world.push(big_diffuse);
+    world.push(big_metal);
+    world.push(big_hollow);
+    world.push(big_hollow_inner);
 
     world
 }
