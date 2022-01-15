@@ -130,7 +130,7 @@ fn main() {
     let mut image_buffer: RgbImage = ImageBuffer::new(IMAGE_WIDTH as u32, IMAGE_HEIGHT as u32);
 
     for j in (0..IMAGE_HEIGHT).rev() {
-        eprintln!("Scanlines remaining: {}", j);
+        eprintln!("Scanlines remaining: {j}");
         let scanline: Vec<Color> = (0..IMAGE_WIDTH)
             .into_par_iter()
             .map(|i| {
