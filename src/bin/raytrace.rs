@@ -152,8 +152,8 @@ fn main() {
             .collect();
 
         for (i, pixel) in scanline.into_iter().enumerate() {
-            let pixel = pixel.to_rgb(SAMPLES_PER_PIXEL);
-            image_buffer.put_pixel(i as u32, (IMAGE_HEIGHT - j - 1) as u32, pixel);
+            let pixel = pixel / SAMPLES_PER_PIXEL as f64;
+            image_buffer.put_pixel(i as u32, (IMAGE_HEIGHT - j - 1) as u32, pixel.into());
         }
     }
 
