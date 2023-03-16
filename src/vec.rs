@@ -244,10 +244,10 @@ impl Neg for Vec3 {
 
 impl From<Vec3> for Rgb<u8> {
     fn from(value: Vec3) -> Self {
-        let maxval = (u8::max_value() + 1) as f64;
-        let ir = (maxval * value[0].sqrt().clamp(0.0, 0.999)) as u8;
-        let ig = (maxval * value[1].sqrt().clamp(0.0, 0.999)) as u8;
-        let ib = (maxval * value[2].sqrt().clamp(0.0, 0.999)) as u8;
+        const MAXVAL: f64 = 256.0;
+        let ir = (MAXVAL * value[0].sqrt().clamp(0.0, 0.999)) as u8;
+        let ig = (MAXVAL * value[1].sqrt().clamp(0.0, 0.999)) as u8;
+        let ib = (MAXVAL * value[2].sqrt().clamp(0.0, 0.999)) as u8;
         Self([ir, ig, ib])
     }
 }
